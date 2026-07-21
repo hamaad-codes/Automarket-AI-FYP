@@ -4,7 +4,7 @@ let cachedTransporter = null;
 
 const getTransporter = () => {
     const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const port = parseInt(process.env.SMTP_PORT || '587');
+    const port = parseInt(process.env.SMTP_PORT || '465');
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
 
@@ -13,18 +13,29 @@ const getTransporter = () => {
     }
 
     if (!cachedTransporter) {
-        cachedTransporter = nodemailer.createTransport({
-            host: host,
-            port: port,
-            secure: port === 465,
-            connectionTimeout: 8000, // 8s connection timeout
-            greetingTimeout: 5000,   // 5s greeting timeout
-            socketTimeout: 10000,    // 10s socket timeout
-            auth: {
-                user: user,
-                pass: pass
-            }
-        });
+        // If host is gmail, we can use nodemailer service 'gmail' or port 465 SSL
+        if (host.includes('gmail')) {
+            cachedTransporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: user,
+                    pass: pass
+                }
+            });
+        } else {
+            cachedTransporter = nodemailer.createTransport({
+                host: host,
+                port: port,
+                secure: port === 465,
+                connectionTimeout: 8000,
+                greetingTimeout: 5000,
+                socketTimeout: 10000,
+                auth: {
+                    user: user,
+                    pass: pass
+                }
+            });
+        }
     }
 
     return cachedTransporter;
