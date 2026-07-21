@@ -51,14 +51,15 @@ const getTransporter = () => {
 
 // Resend HTTP API Sender (Works over HTTPS Port 443 - Never blocked by Render)
 const sendViaResendApi = async (email, code, subject, htmlContent) => {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) return false;
+    const rawKey = process.env.RESEND_API_KEY || '';
+    const cleanKey = rawKey.trim().replace(/^["']|["']$/g, '');
+    if (!cleanKey) return false;
 
     try {
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey.trim()}`,
+                'Authorization': `Bearer ${cleanKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
