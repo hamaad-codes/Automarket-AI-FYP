@@ -12,13 +12,13 @@ const createTransporterConfig = (host, port, user, pass) => {
         port: targetPort,
         secure: targetPort === 465,
         requireTLS: targetPort === 587,
-        family: 4, // CRITICAL: Force IPv4 to fix Render/Cloud ENETUNREACH IPv6 error
+        family: 4, // Force IPv4
         pool: true,
         maxConnections: 5,
         maxMessages: 100,
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
+        connectionTimeout: 5000, // Fast 5s timeout to prevent hanging on blocked cloud ports
+        greetingTimeout: 5000,
+        socketTimeout: 5000,
         tls: {
             rejectUnauthorized: false
         },
@@ -29,10 +29,9 @@ const createTransporterConfig = (host, port, user, pass) => {
     });
 };
 
-const getTransporter = (forcePort = null) => {
+const getTransporter = () => {
     const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
-    const defaultPort = parseInt(process.env.SMTP_PORT || '587');
-    const port = forcePort || defaultPort;
+    const port = parseInt(process.env.SMTP_PORT || '587');
     const rawUser = process.env.SMTP_USER;
     const rawPass = process.env.SMTP_PASS;
 
@@ -43,29 +42,49 @@ const getTransporter = (forcePort = null) => {
     const user = rawUser.trim();
     const pass = rawPass.replace(/\s+/g, '');
 
-    if (!cachedTransporter || forcePort) {
-        const transporter = createTransporterConfig(host, port, user, pass);
-        if (!forcePort) {
-            cachedTransporter = transporter;
-        }
-        return transporter;
+    if (!cachedTransporter) {
+        cachedTransporter = createTransporterConfig(host, port, user, pass);
     }
 
     return cachedTransporter;
 };
 
-export const sendVerificationEmail = async (email, code, type = 'verification') => {
-    const rawUser = process.env.SMTP_USER;
-    const transporter = getTransporter();
+// Resend HTTP API Sender (Works over HTTPS Port 443 - Never blocked by Render)
+const sendViaResendApi = async (email, code, subject, htmlContent) => {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return false;
 
-    if (!transporter) {
-        console.log('\n======================================================');
-        console.log(`[SMTP NOT CONFIGURED] ${type.toUpperCase()} Code for ${email} is: ${code}`);
-        console.log('======================================================\n');
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey.trim()}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: 'AutoMarket <onboarding@resend.dev>',
+                to: [email],
+                subject: subject,
+                html: htmlContent
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            console.log(`[RESEND API SUCCESS] Verification email sent to ${email} (ID: ${data.id})`);
+            return true;
+        } else {
+            console.error('[RESEND API ERROR]', data);
+            return false;
+        }
+    } catch (err) {
+        console.error('[RESEND API FETCH ERROR]', err.message);
         return false;
     }
+};
 
-    const senderUser = rawUser ? rawUser.trim() : 'hamaadzafar7@gmail.com';
+export const sendVerificationEmail = async (email, code, type = 'verification') => {
+    const rawUser = process.env.SMTP_USER;
     const isReset = type === 'reset';
     const subject = isReset ? 'Reset Your AutoMarket Password' : 'Verify Your AutoMarket Account';
     const heading = isReset ? 'Password Reset Request' : 'Welcome to AutoMarket!';
@@ -86,6 +105,23 @@ export const sendVerificationEmail = async (email, code, type = 'verification') 
         </div>
     `;
 
+    // 1. Try Resend HTTP API first if key exists (Recommended for Render cloud hosting)
+    if (process.env.RESEND_API_KEY) {
+        const resendSuccess = await sendViaResendApi(email, code, subject, htmlContent);
+        if (resendSuccess) return true;
+    }
+
+    // 2. Try SMTP Nodemailer Transporter (Works locally)
+    const transporter = getTransporter();
+    if (!transporter) {
+        console.log('\n======================================================');
+        console.log(`[SMTP NOT CONFIGURED] ${type.toUpperCase()} Code for ${email} is: ${code}`);
+        console.log('======================================================\n');
+        return false;
+    }
+
+    const senderUser = rawUser ? rawUser.trim() : 'hamaadzafar7@gmail.com';
+
     try {
         await transporter.sendMail({
             from: `"AutoMarket" <${senderUser}>`,
@@ -94,33 +130,13 @@ export const sendVerificationEmail = async (email, code, type = 'verification') 
             html: htmlContent
         });
 
-        console.log(`[EMAIL SENT] ${type} email sent successfully to ${email}`);
+        console.log(`[EMAIL SENT VIA SMTP] ${type} email sent successfully to ${email}`);
         return true;
     } catch (error) {
-        console.error('Error sending email (Primary IPv4 attempt):', error.message);
-        
-        // Automatic retry with alternate port (587 <-> 465) using IPv4
-        try {
-            const currentPort = parseInt(process.env.SMTP_PORT || '587');
-            const fallbackPort = (currentPort === 465) ? 587 : 465;
-            console.log(`Retrying email sending with fallback IPv4 port (${fallbackPort})...`);
-            const fallbackTransporter = getTransporter(fallbackPort);
-            
-            await fallbackTransporter.sendMail({
-                from: `"AutoMarket" <${senderUser}>`,
-                to: email,
-                subject: subject,
-                html: htmlContent
-            });
-
-            console.log(`[EMAIL SENT FALLBACK] ${type} email sent successfully to ${email}`);
-            return true;
-        } catch (fallbackError) {
-            console.error('Fallback email sending failed:', fallbackError.message);
-            console.log('\n======================================================');
-            console.log(`[FALLBACK LOG] ${type.toUpperCase()} Code for ${email} is: ${code}`);
-            console.log('======================================================\n');
-            return false;
-        }
+        console.error(`Error sending email via SMTP (${error.message}). Note: Render free tier blocks outbound SMTP ports 25/465/587.`);
+        console.log('\n======================================================');
+        console.log(`[RENDER FALLBACK LOG] ${type.toUpperCase()} Code for ${email} is: ${code}`);
+        console.log('======================================================\n');
+        return false;
     }
 };
