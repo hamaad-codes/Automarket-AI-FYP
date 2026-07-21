@@ -356,10 +356,13 @@ router.post('/forgot-password', customRateLimiter(5 * 60 * 1000, 3, 'Too many pa
         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins expiry
         await user.save();
 
-        console.log(`[DEV MODE] Forgot Password Reset Code for ${email} is: ${code}`);
+        console.log(`Forgot Password Reset Code for ${email} is: ${code}`);
+
+        // Send reset email in background (non-blocking for fast UI response time)
+        sendVerificationEmail(email, code, 'reset').catch(err => console.error("Background reset email send error:", err.message));
 
         res.json({ 
-            msg: 'Verification code sent to your email (Mocked)', 
+            msg: 'Verification code sent to your email', 
             devCode: code 
         });
     } catch (err) {
