@@ -134,10 +134,13 @@ const Register = () => {
         throw new Error(data.msg || 'Registration verification code send failed');
       }
 
-      setDevCode("");
+      if (data.devCode) {
+        setDevCode(data.devCode);
+        setCode(data.devCode);
+      }
       toast({
         title: "Verification Code Sent",
-        description: "Please check your Gmail inbox for the 6-digit verification code.",
+        description: data.devCode ? `Your 6-digit code is: ${data.devCode}` : "Please check your Gmail inbox for the 6-digit verification code.",
       });
       setStep(2);
     } catch (error: any) {

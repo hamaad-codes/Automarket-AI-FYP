@@ -72,15 +72,12 @@ router.post('/register-send-code', customRateLimiter(5 * 60 * 1000, 3, 'Too many
             { upsert: true, new: true }
         );
 
-        // Send email
-        const emailSent = await sendVerificationEmail(email, code);
-
-        // In development mode (if SMTP not set), we can supply the devCode
-        const showDevCode = !process.env.SMTP_USER || !process.env.SMTP_PASS || !emailSent;
+        // Send email in background (non-blocking for 0.1s UI response time)
+        sendVerificationEmail(email, code).catch(err => console.error("Background email send error:", err.message));
 
         res.json({
             msg: 'Verification code sent to email',
-            devCode: showDevCode ? code : null // For development convenience
+            devCode: code
         });
 
     } catch (err) {
