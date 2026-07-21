@@ -1,12 +1,40 @@
 import nodemailer from 'nodemailer';
 
-export const sendVerificationEmail = async (email, code) => {
+let cachedTransporter = null;
+
+const getTransporter = () => {
     const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const port = process.env.SMTP_PORT || 587;
+    const port = parseInt(process.env.SMTP_PORT || '587');
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
 
     if (!user || !pass) {
+        return null;
+    }
+
+    if (!cachedTransporter) {
+        cachedTransporter = nodemailer.createTransport({
+            host: host,
+            port: port,
+            secure: port === 465,
+            connectionTimeout: 8000, // 8s connection timeout
+            greetingTimeout: 5000,   // 5s greeting timeout
+            socketTimeout: 10000,    // 10s socket timeout
+            auth: {
+                user: user,
+                pass: pass
+            }
+        });
+    }
+
+    return cachedTransporter;
+};
+
+export const sendVerificationEmail = async (email, code) => {
+    const user = process.env.SMTP_USER;
+    const transporter = getTransporter();
+
+    if (!transporter) {
         console.log('\n======================================================');
         console.log(`[SMTP NOT CONFIGURED] Verification Code for ${email} is: ${code}`);
         console.log('======================================================\n');
@@ -14,16 +42,6 @@ export const sendVerificationEmail = async (email, code) => {
     }
 
     try {
-        const transporter = nodemailer.createTransport({
-            host: host,
-            port: port,
-            secure: port == 465, // true for 465, false for other ports
-            auth: {
-                user: user,
-                pass: pass
-            }
-        });
-
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff;">
                 <h2 style="color: #6366f1; text-align: center; margin-bottom: 20px;">Welcome to AutoMarket!</h2>
@@ -48,7 +66,6 @@ export const sendVerificationEmail = async (email, code) => {
         return true;
     } catch (error) {
         console.error('Error sending verification email:', error.message);
-        // Fallback log to console in case of errors
         console.log('\n======================================================');
         console.log(`[FALLBACK LOG] Verification Code for ${email} is: ${code}`);
         console.log('======================================================\n');
