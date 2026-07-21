@@ -2,9 +2,37 @@ import nodemailer from 'nodemailer';
 
 let cachedTransporter = null;
 
-const getTransporter = () => {
+const createTransporterConfig = (host, port, user, pass) => {
+    const isGmail = host.includes('gmail');
+    const targetHost = isGmail ? 'smtp.gmail.com' : host;
+    const targetPort = port || 587;
+
+    return nodemailer.createTransport({
+        host: targetHost,
+        port: targetPort,
+        secure: targetPort === 465,
+        requireTLS: targetPort === 587,
+        family: 4, // CRITICAL: Force IPv4 to fix Render/Cloud ENETUNREACH IPv6 error
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100,
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
+        tls: {
+            rejectUnauthorized: false
+        },
+        auth: {
+            user: user,
+            pass: pass
+        }
+    });
+};
+
+const getTransporter = (forcePort = null) => {
     const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
-    const port = parseInt(process.env.SMTP_PORT || '587');
+    const defaultPort = parseInt(process.env.SMTP_PORT || '587');
+    const port = forcePort || defaultPort;
     const rawUser = process.env.SMTP_USER;
     const rawPass = process.env.SMTP_PASS;
 
@@ -15,38 +43,12 @@ const getTransporter = () => {
     const user = rawUser.trim();
     const pass = rawPass.replace(/\s+/g, '');
 
-    if (!cachedTransporter) {
-        if (host.includes('gmail')) {
-            cachedTransporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
-                port: 465,
-                secure: true,
-                pool: true,
-                maxConnections: 5,
-                maxMessages: 100,
-                connectionTimeout: 5000,
-                greetingTimeout: 5000,
-                socketTimeout: 10000,
-                auth: {
-                    user: user,
-                    pass: pass
-                }
-            });
-        } else {
-            cachedTransporter = nodemailer.createTransport({
-                host: host,
-                port: port,
-                secure: port === 465,
-                pool: true,
-                connectionTimeout: 5000,
-                greetingTimeout: 5000,
-                socketTimeout: 10000,
-                auth: {
-                    user: user,
-                    pass: pass
-                }
-            });
+    if (!cachedTransporter || forcePort) {
+        const transporter = createTransporterConfig(host, port, user, pass);
+        if (!forcePort) {
+            cachedTransporter = transporter;
         }
+        return transporter;
     }
 
     return cachedTransporter;
@@ -95,10 +97,30 @@ export const sendVerificationEmail = async (email, code, type = 'verification') 
         console.log(`[EMAIL SENT] ${type} email sent successfully to ${email}`);
         return true;
     } catch (error) {
-        console.error('Error sending email:', error.message);
-        console.log('\n======================================================');
-        console.log(`[FALLBACK LOG] ${type.toUpperCase()} Code for ${email} is: ${code}`);
-        console.log('======================================================\n');
-        return false;
+        console.error('Error sending email (Primary IPv4 attempt):', error.message);
+        
+        // Automatic retry with alternate port (587 <-> 465) using IPv4
+        try {
+            const currentPort = parseInt(process.env.SMTP_PORT || '587');
+            const fallbackPort = (currentPort === 465) ? 587 : 465;
+            console.log(`Retrying email sending with fallback IPv4 port (${fallbackPort})...`);
+            const fallbackTransporter = getTransporter(fallbackPort);
+            
+            await fallbackTransporter.sendMail({
+                from: `"AutoMarket" <${senderUser}>`,
+                to: email,
+                subject: subject,
+                html: htmlContent
+            });
+
+            console.log(`[EMAIL SENT FALLBACK] ${type} email sent successfully to ${email}`);
+            return true;
+        } catch (fallbackError) {
+            console.error('Fallback email sending failed:', fallbackError.message);
+            console.log('\n======================================================');
+            console.log(`[FALLBACK LOG] ${type.toUpperCase()} Code for ${email} is: ${code}`);
+            console.log('======================================================\n');
+            return false;
+        }
     }
 };
