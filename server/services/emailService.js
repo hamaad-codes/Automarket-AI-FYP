@@ -49,7 +49,45 @@ const getTransporter = () => {
     return cachedTransporter;
 };
 
-// Resend HTTP API Sender (Works over HTTPS Port 443 - Never blocked by Render)
+// Brevo (Sendinblue) HTTP API Sender (Allows 300 emails/day to ANY address over HTTPS Port 443)
+const sendViaBrevoApi = async (email, code, subject, htmlContent) => {
+    const rawKey = process.env.BREVO_API_KEY || '';
+    const cleanKey = rawKey.trim().replace(/^["']|["']$/g, '');
+    if (!cleanKey) return false;
+
+    const senderEmail = (process.env.SMTP_USER || 'hamaadzafar7@gmail.com').trim();
+
+    try {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'api-key': cleanKey,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { name: 'AutoMarket', email: senderEmail },
+                to: [{ email: email }],
+                subject: subject,
+                htmlContent: htmlContent
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            console.log(`[BREVO API SUCCESS] Verification email sent to ${email} (MessageId: ${data.messageId})`);
+            return true;
+        } else {
+            console.error('[BREVO API ERROR]', data);
+            return false;
+        }
+    } catch (err) {
+        console.error('[BREVO API FETCH ERROR]', err.message);
+        return false;
+    }
+};
+
+// Resend HTTP API Sender (Works over HTTPS Port 443 - Testing mode supports owner email)
 const sendViaResendApi = async (email, code, subject, htmlContent) => {
     const rawKey = process.env.RESEND_API_KEY || '';
     const cleanKey = rawKey.trim().replace(/^["']|["']$/g, '');
@@ -106,13 +144,19 @@ export const sendVerificationEmail = async (email, code, type = 'verification') 
         </div>
     `;
 
-    // 1. Try Resend HTTP API first if key exists (Recommended for Render cloud hosting)
+    // 1. Try Brevo HTTP API first if key exists (Allows sending to ANY recipient email for free)
+    if (process.env.BREVO_API_KEY) {
+        const brevoSuccess = await sendViaBrevoApi(email, code, subject, htmlContent);
+        if (brevoSuccess) return true;
+    }
+
+    // 2. Try Resend HTTP API if key exists
     if (process.env.RESEND_API_KEY) {
         const resendSuccess = await sendViaResendApi(email, code, subject, htmlContent);
         if (resendSuccess) return true;
     }
 
-    // 2. Try SMTP Nodemailer Transporter (Works locally)
+    // 3. Try SMTP Nodemailer Transporter (Works locally)
     const transporter = getTransporter();
     if (!transporter) {
         console.log('\n======================================================');
