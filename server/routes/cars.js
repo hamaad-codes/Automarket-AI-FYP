@@ -410,7 +410,9 @@ router.post('/predict-price', async (req, res) => {
     try {
         const { make, model, year, bodyType, mileage, fuelType, transmission, color, location, assembly, engineDisplacement } = req.body;
         
-        const response = await axios.post('http://localhost:5002/predict', {
+        const predictUrl = process.env.PREDICT_SERVER_URL || 'http://127.0.0.1:5002/predict';
+
+        const response = await axios.post(predictUrl, {
             make,
             model,
             year,
@@ -422,7 +424,7 @@ router.post('/predict-price', async (req, res) => {
             location,
             assembly,
             engineDisplacement
-        });
+        }, { timeout: 10000 });
 
         const predictedPrice = response.data.predicted_price;
         const minPrice = Math.round(predictedPrice * 0.92);
