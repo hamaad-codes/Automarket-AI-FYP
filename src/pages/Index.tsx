@@ -112,9 +112,9 @@ const Index = () => {
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 transition-all duration-300">
+      <main className="w-full max-w-[1440px] mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-10 transition-all duration-300 overflow-x-hidden">
         {/* Hero Section */}
-        <section className="relative mb-8 lg:mb-10 rounded-2xl overflow-hidden shadow-2xl group min-h-[68vh] lg:min-h-[72vh] flex flex-col justify-between py-12 px-6 sm:px-8 lg:px-12">
+        <section className="relative mb-6 sm:mb-8 lg:mb-10 rounded-2xl overflow-hidden shadow-2xl group min-h-[75vh] sm:min-h-[68vh] lg:min-h-[72vh] flex flex-col justify-between py-6 px-4 sm:py-12 sm:px-8 lg:px-12">
           {/* Background Image with Parallax & Zoom Effect */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <img
@@ -133,7 +133,7 @@ const Index = () => {
             <div className="max-w-3xl">
               {/* Small Badge */}
               <div dangerouslySetInnerHTML={{
-                __html: `<div class="inline-flex items-center gap-2 bg-blue-500/10 backdrop-blur-lg border border-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 animate-fade-in shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                __html: `<div class="inline-flex items-center gap-2 bg-blue-500/10 backdrop-blur-lg border border-blue-500/20 text-blue-300 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold mb-4 sm:mb-5 animate-fade-in shadow-[0_0_15px_rgba(59,130,246,0.15)]">
                 <span class="relative flex h-2 w-2">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-400"></span>
@@ -142,30 +142,30 @@ const Index = () => {
               </div>` }} />
 
               {/* Large Heading */}
-              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] mb-4 tracking-tight">
+              <h1 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-3 sm:mb-4 tracking-tight">
                 <span className="block animate-fade-in-up" style={{ animationDelay: "0ms" }}>Find Your</span>
                 <span className="block animate-fade-in-up text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400" style={{ animationDelay: "150ms" }}>
                   Perfect Drive
                 </span>
               </h1>
 
-              {/* Short description (max 2 lines) */}
-              <p className="text-sm md:text-base text-white/80 max-w-xl mb-6 animate-fade-in-up leading-relaxed" style={{ animationDelay: "300ms" }}>
+              {/* Short description */}
+              <p className="text-xs sm:text-base text-white/80 max-w-xl mb-5 sm:mb-6 animate-fade-in-up leading-relaxed" style={{ animationDelay: "300ms" }}>
                 Experience Pakistan's smartest automotive marketplace. Get instant AI price valuations, verified listings, and seamless matching.
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4 mb-6 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-                <Link to="/buy-now">
-                  <button className="relative overflow-hidden bg-primary text-primary-foreground hover:bg-primary/95 px-6 py-3 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98] group/btn ring-1 ring-white/20">
-                    <span className="relative z-10 flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-4 mb-5 sm:mb-6 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+                <Link to="/buy-now" className="w-full sm:w-auto">
+                  <button className="w-full sm:w-auto relative overflow-hidden bg-primary text-primary-foreground hover:bg-primary/95 px-6 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98] group/btn ring-1 ring-white/20">
+                    <span className="relative z-10 flex items-center justify-center gap-2">
                       Browse Inventory <span className="text-base">→</span>
                     </span>
                     <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   </button>
                 </Link>
-                <Link to="/create-listing">
-                  <button className="bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/15 px-6 py-3 rounded-xl font-heading font-bold text-sm transition-all transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:border-white/25">
+                <Link to="/create-listing" className="w-full sm:w-auto">
+                  <button className="w-full sm:w-auto bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/15 px-6 py-3 rounded-xl font-heading font-bold text-xs sm:text-sm transition-all transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:border-white/25">
                     Sell Your Car
                   </button>
                 </Link>
@@ -173,9 +173,9 @@ const Index = () => {
 
               {/* Compact Search Module */}
               <form onSubmit={handleHeroSearch} className="w-full max-w-4xl animate-fade-in-up mb-4" style={{ animationDelay: "500ms" }}>
-                <div className="flex flex-col md:flex-row items-center gap-1.5 bg-black/45 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-2xl">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-1.5 bg-black/60 md:bg-black/45 backdrop-blur-xl border border-white/10 p-2 sm:p-1.5 rounded-2xl shadow-2xl">
                   {/* Brand Select */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
+                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
                     <Tag className="w-4 h-4 text-blue-400 flex-shrink-0" />
                     <div className="flex-1 text-left">
                       <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">Brand</label>
@@ -193,7 +193,7 @@ const Index = () => {
                   </div>
 
                   {/* Model Input */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
+                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
                     <Car className="w-4 h-4 text-blue-400 flex-shrink-0" />
                     <div className="flex-1 text-left">
                       <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">Model</label>
@@ -208,7 +208,7 @@ const Index = () => {
                   </div>
 
                   {/* City Select */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
+                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
                     <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
                     <div className="flex-1 text-left">
                       <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">City</label>
@@ -226,7 +226,7 @@ const Index = () => {
                   </div>
 
                   {/* Budget Select */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 w-full md:w-1/4">
+                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4">
                     <Landmark className="w-4 h-4 text-blue-400 flex-shrink-0" />
                     <div className="flex-1 text-left">
                       <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">Max Budget</label>
@@ -249,7 +249,7 @@ const Index = () => {
                   {/* Search Button */}
                   <button 
                     type="submit" 
-                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 flex-shrink-0 md:ml-1"
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 flex-shrink-0 md:ml-1 mt-1 md:mt-0"
                   >
                     <Search className="w-3.5 h-3.5" />
                     <span>Search</span>
@@ -258,7 +258,7 @@ const Index = () => {
               </form>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 mt-3 animate-fade-in-up text-[11px] text-white/70" style={{ animationDelay: "580ms" }}>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 animate-fade-in-up text-[11px] text-white/70" style={{ animationDelay: "580ms" }}>
                 <div className="flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5 text-blue-400 bg-blue-500/10 p-0.5 rounded-full" />
                   <span>Verified Listings</span>
@@ -276,25 +276,25 @@ const Index = () => {
           </div>
 
           {/* Bottom Statistics Strip */}
-          <div className="relative z-10 w-full max-w-[1440px] mx-auto border-t border-white/10 pt-4 mt-8 flex flex-wrap justify-between items-center text-xs md:text-sm text-white/75 gap-4 animate-fade-in" style={{ animationDelay: "650ms" }}>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white text-base">5,000+</span>
-              <span className="text-white/50 text-[11px] uppercase tracking-wider font-semibold">Cars Listed</span>
+          <div className="relative z-10 w-full max-w-[1440px] mx-auto border-t border-white/10 pt-4 mt-6 sm:mt-8 grid grid-cols-2 md:flex justify-between items-center text-xs md:text-sm text-white/75 gap-3 sm:gap-4 animate-fade-in" style={{ animationDelay: "650ms" }}>
+            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
+              <span className="font-bold text-white text-sm sm:text-base">5,000+</span>
+              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cars Listed</span>
             </div>
             <div className="h-4 w-px bg-white/10 hidden md:block" />
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white text-base">1,200+</span>
-              <span className="text-white/50 text-[11px] uppercase tracking-wider font-semibold">Verified Sellers</span>
+            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
+              <span className="font-bold text-white text-sm sm:text-base">1,200+</span>
+              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Sellers</span>
             </div>
             <div className="h-4 w-px bg-white/10 hidden md:block" />
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white text-base">95%</span>
-              <span className="text-white/50 text-[11px] uppercase tracking-wider font-semibold">AI Price Accuracy</span>
+            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
+              <span className="font-bold text-white text-sm sm:text-base">95%</span>
+              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Accuracy</span>
             </div>
             <div className="h-4 w-px bg-white/10 hidden md:block" />
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white text-base">50+</span>
-              <span className="text-white/50 text-[11px] uppercase tracking-wider font-semibold">Cities Covered</span>
+            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
+              <span className="font-bold text-white text-sm sm:text-base">50+</span>
+              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cities</span>
             </div>
           </div>
         </section>

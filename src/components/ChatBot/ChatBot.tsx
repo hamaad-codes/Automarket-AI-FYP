@@ -239,14 +239,14 @@ const ChatBot: React.FC = () => {
     if (shouldHide) return null;
 
     return (
-        <div className={`fixed z-[100] flex flex-col items-end gap-3 transition-all duration-500 ease-in-out ${isMaximized
-            ? 'inset-0 w-full h-full bg-background/95 backdrop-blur-sm p-4 sm:p-6'
-            : 'bottom-6 right-6'
+        <div className={`fixed z-[100] flex flex-col items-end gap-2 sm:gap-3 transition-all duration-500 ease-in-out ${isMaximized
+            ? 'inset-0 w-full h-full bg-background/95 backdrop-blur-sm p-3 sm:p-6'
+            : 'bottom-3 right-3 sm:bottom-6 sm:right-6 max-w-[calc(100vw-24px)]'
             }`}>
             {isOpen && (
                 <Card className={`flex flex-col shadow-2xl border-primary/20 bg-background/98 backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-500 overflow-hidden ring-1 ring-black/10 transition-all ${isMaximized
                     ? 'w-full h-full max-h-full rounded-2xl'
-                    : 'mb-4 w-[95vw] sm:w-[340px] h-[500px] max-h-[500px] rounded-xl'
+                    : 'mb-2 sm:mb-4 w-[calc(100vw-24px)] sm:w-[350px] md:w-[380px] h-[75vh] sm:h-[500px] max-h-[550px] rounded-xl sm:rounded-2xl'
                     }`}>
                     {/* Header */}
                     <div className="p-4 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white flex justify-between items-center shadow-lg relative overflow-hidden shrink-0">
@@ -453,18 +453,18 @@ const ChatBot: React.FC = () => {
             {!isMaximized && (
                 <div className="relative group">
                     {!isOpen && showBadge && (
-                        <div className="absolute -top-14 right-0 bg-primary text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-xl animate-bounce flex items-center gap-2">
+                        <div className="absolute -top-11 sm:-top-14 right-0 bg-primary text-white text-[9px] sm:text-[10px] font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-xl animate-bounce flex items-center gap-1.5 whitespace-nowrap">
                             AI AUTO ADVISOR <Sparkles className="w-3 h-3" />
-                            <div className="absolute -bottom-1 right-8 w-2 h-2 bg-primary rotate-45" />
+                            <div className="absolute -bottom-1 right-6 sm:right-8 w-2 h-2 bg-primary rotate-45" />
                         </div>
                     )}
                     <Button
                         size="lg"
-                        className={`rounded-full w-[70px] h-[70px] shadow-2xl transition-all duration-500 border-4 border-background ${isOpen ? 'rotate-90 bg-destructive' : 'bg-primary hover:scale-110'
+                        className={`rounded-full w-14 h-14 sm:w-[70px] sm:h-[70px] shadow-2xl transition-all duration-500 border-2 sm:border-4 border-background ${isOpen ? 'rotate-90 bg-destructive' : 'bg-primary hover:scale-110'
                             }`}
                         onClick={() => { setIsOpen(!isOpen); setShowBadge(false); }}
                     >
-                        {isOpen ? <X className="w-8 h-8" /> : <MessageSquareHeart className="w-8 h-8" />}
+                        {isOpen ? <X className="w-6 h-6 sm:w-8 sm:h-8" /> : <MessageSquareHeart className="w-6 h-6 sm:w-8 sm:h-8" />}
                     </Button>
                     {!isOpen && <div className="absolute -inset-2 bg-primary/20 rounded-full blur-xl animate-pulse -z-10" />}
                 </div>
