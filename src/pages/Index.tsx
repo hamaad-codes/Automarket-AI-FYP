@@ -114,26 +114,29 @@ const Index = () => {
       {/* Main Content */}
       <main className="w-full max-w-[1440px] mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-10 transition-all duration-300 overflow-x-hidden">
         {/* Hero Section */}
-        <section className="relative mb-6 sm:mb-8 lg:mb-10 rounded-2xl overflow-hidden shadow-2xl group min-h-[75vh] sm:min-h-[68vh] lg:min-h-[72vh] flex flex-col justify-between py-6 px-4 sm:py-12 sm:px-8 lg:px-12">
-          {/* Background Image with Parallax & Zoom Effect */}
+        <section className="relative mb-6 sm:mb-8 lg:mb-10 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl group min-h-[500px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-between py-6 px-4 sm:py-10 sm:px-8 lg:py-12 lg:px-12 transition-all duration-300">
+          {/* Background Image with Responsive Fit & Gradient Overlay */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1920&auto=format&fit=crop"
               alt="Luxury Car Background"
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-              style={{ transform: `translateY(${scrollY * 0.3}px) scale(1.05)` }}
+              className="w-full h-full object-cover object-center sm:object-[center_35%] transition-transform duration-700 group-hover:scale-105"
+              style={{ 
+                transform: `translateY(${Math.min(scrollY * 0.12, 40)}px) scale(1.06)`,
+                willChange: "transform"
+              }}
             />
-            {/* Premium Dark Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 lg:from-black/95 lg:via-black/70 lg:to-transparent opacity-95" />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/60" />
+            {/* Premium Responsive Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/80 to-black/95 lg:bg-gradient-to-r lg:from-black/95 lg:via-black/75 lg:to-black/30 opacity-90 lg:opacity-95" />
+            <div className="absolute inset-0 bg-black/20 backdrop-brightness-95" />
           </div>
 
           {/* Main Hero Content (Top/Middle Area) */}
-          <div className="relative z-10 w-full max-w-[1440px] mx-auto flex flex-col justify-center flex-grow">
+          <div className="relative z-10 w-full max-w-[1440px] mx-auto flex flex-col justify-center flex-grow py-2 sm:py-4">
             <div className="max-w-3xl">
               {/* Small Badge */}
               <div dangerouslySetInnerHTML={{
-                __html: `<div class="inline-flex items-center gap-2 bg-blue-500/10 backdrop-blur-lg border border-blue-500/20 text-blue-300 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold mb-4 sm:mb-5 animate-fade-in shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                __html: `<div class="inline-flex items-center gap-2 bg-blue-500/10 backdrop-blur-lg border border-blue-500/20 text-blue-300 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold mb-3 sm:mb-5 animate-fade-in shadow-[0_0_15px_rgba(59,130,246,0.15)]">
                 <span class="relative flex h-2 w-2">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-400"></span>
@@ -142,7 +145,7 @@ const Index = () => {
               </div>` }} />
 
               {/* Large Heading */}
-              <h1 className="font-heading text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-3 sm:mb-4 tracking-tight">
+              <h1 className="font-heading text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-3 sm:mb-4 tracking-tight">
                 <span className="block animate-fade-in-up" style={{ animationDelay: "0ms" }}>Find Your</span>
                 <span className="block animate-fade-in-up text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400" style={{ animationDelay: "150ms" }}>
                   Perfect Drive
@@ -150,7 +153,7 @@ const Index = () => {
               </h1>
 
               {/* Short description */}
-              <p className="text-xs sm:text-base text-white/80 max-w-xl mb-5 sm:mb-6 animate-fade-in-up leading-relaxed" style={{ animationDelay: "300ms" }}>
+              <p className="text-xs sm:text-sm md:text-base text-white/80 max-w-xl mb-5 sm:mb-6 animate-fade-in-up leading-relaxed font-normal" style={{ animationDelay: "300ms" }}>
                 Experience Pakistan's smartest automotive marketplace. Get instant AI price valuations, verified listings, and seamless matching.
               </p>
 
@@ -171,94 +174,96 @@ const Index = () => {
                 </Link>
               </div>
 
-              {/* Compact Search Module */}
-              <form onSubmit={handleHeroSearch} className="w-full max-w-4xl animate-fade-in-up mb-4" style={{ animationDelay: "500ms" }}>
-                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-1.5 bg-black/60 md:bg-black/45 backdrop-blur-xl border border-white/10 p-2 sm:p-1.5 rounded-2xl shadow-2xl">
-                  {/* Brand Select */}
-                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
-                    <Tag className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <div className="flex-1 text-left">
-                      <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">Brand</label>
-                      <select 
-                        value={searchBrand} 
-                        onChange={(e) => setSearchBrand(e.target.value)}
-                        className="bg-transparent text-white text-xs outline-none border-none w-full cursor-pointer pr-4 [&>option]:bg-neutral-900"
-                      >
-                        <option value="">All Brands</option>
-                        {["Suzuki", "Toyota", "Honda", "Daihatsu", "Kia", "Hyundai", "Changan", "MG", "Audi", "BMW", "Mercedes", "Nissan"].map(b => (
-                          <option key={b} value={b}>{b}</option>
-                        ))}
-                      </select>
+              {/* Responsive Search Form Module */}
+              <form onSubmit={handleHeroSearch} className="w-full max-w-4xl animate-fade-in-up mb-3 sm:mb-4" style={{ animationDelay: "500ms" }}>
+                <div className="bg-black/75 lg:bg-black/50 backdrop-blur-xl border border-white/15 p-2.5 sm:p-3 rounded-2xl shadow-2xl transition-all duration-300">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 lg:gap-1.5 items-center">
+                    {/* Brand Select */}
+                    <div className="flex items-center gap-2 px-3 py-2 sm:py-2.5 bg-white/5 lg:bg-transparent rounded-xl lg:rounded-none border lg:border-none border-white/10 lg:border-r lg:border-white/15">
+                      <Tag className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="flex-1 text-left min-w-0">
+                        <label className="block text-[9px] uppercase tracking-wider text-white/50 font-bold">Brand</label>
+                        <select 
+                          value={searchBrand} 
+                          onChange={(e) => setSearchBrand(e.target.value)}
+                          className="bg-transparent text-white text-xs outline-none border-none w-full cursor-pointer pr-2 truncate [&>option]:bg-neutral-900"
+                        >
+                          <option value="">All Brands</option>
+                          {["Suzuki", "Toyota", "Honda", "Daihatsu", "Kia", "Hyundai", "Changan", "MG", "Audi", "BMW", "Mercedes", "Nissan"].map(b => (
+                            <option key={b} value={b}>{b}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Model Input */}
-                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
-                    <Car className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <div className="flex-1 text-left">
-                      <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">Model</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Corolla, Civic" 
-                        value={searchModel}
-                        onChange={(e) => setSearchModel(e.target.value)}
-                        className="bg-transparent text-white text-xs outline-none border-none w-full placeholder:text-white/25"
-                      />
+                    {/* Model Input */}
+                    <div className="flex items-center gap-2 px-3 py-2 sm:py-2.5 bg-white/5 lg:bg-transparent rounded-xl lg:rounded-none border lg:border-none border-white/10 lg:border-r lg:border-white/15">
+                      <Car className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="flex-1 text-left min-w-0">
+                        <label className="block text-[9px] uppercase tracking-wider text-white/50 font-bold">Model</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Corolla, Civic" 
+                          value={searchModel}
+                          onChange={(e) => setSearchModel(e.target.value)}
+                          className="bg-transparent text-white text-xs outline-none border-none w-full placeholder:text-white/30 truncate"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* City Select */}
-                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4 border-b md:border-b-0 md:border-r border-white/10">
-                    <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <div className="flex-1 text-left">
-                      <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">City</label>
-                      <select 
-                        value={searchCity} 
-                        onChange={(e) => setSearchCity(e.target.value)}
-                        className="bg-transparent text-white text-xs outline-none border-none w-full cursor-pointer pr-4 [&>option]:bg-neutral-900"
-                      >
-                        <option value="">All Cities</option>
-                        {["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Peshawar", "Faisalabad", "Multan", "Quetta"].map(c => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </select>
+                    {/* City Select */}
+                    <div className="flex items-center gap-2 px-3 py-2 sm:py-2.5 bg-white/5 lg:bg-transparent rounded-xl lg:rounded-none border lg:border-none border-white/10 lg:border-r lg:border-white/15">
+                      <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="flex-1 text-left min-w-0">
+                        <label className="block text-[9px] uppercase tracking-wider text-white/50 font-bold">City</label>
+                        <select 
+                          value={searchCity} 
+                          onChange={(e) => setSearchCity(e.target.value)}
+                          className="bg-transparent text-white text-xs outline-none border-none w-full cursor-pointer pr-2 truncate [&>option]:bg-neutral-900"
+                        >
+                          <option value="">All Cities</option>
+                          {["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Peshawar", "Faisalabad", "Multan", "Quetta"].map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Budget Select */}
-                  <div className="flex items-center gap-2 px-3 py-2 md:py-1.5 w-full md:w-1/4">
-                    <Landmark className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                    <div className="flex-1 text-left">
-                      <label className="block text-[9px] uppercase tracking-wider text-white/40 font-bold">Max Budget</label>
-                      <select 
-                        value={searchBudget} 
-                        onChange={(e) => setSearchBudget(e.target.value)}
-                        className="bg-transparent text-white text-xs outline-none border-none w-full cursor-pointer pr-4 [&>option]:bg-neutral-900"
-                      >
-                        <option value="">Any Price</option>
-                        <option value="1000000">Under 10 Lakh</option>
-                        <option value="2000000">Under 20 Lakh</option>
-                        <option value="3000000">Under 30 Lakh</option>
-                        <option value="5000000">Under 50 Lakh</option>
-                        <option value="8000000">Under 80 Lakh</option>
-                        <option value="15000000">Under 1.5 Crore</option>
-                      </select>
+                    {/* Budget Select */}
+                    <div className="flex items-center gap-2 px-3 py-2 sm:py-2.5 bg-white/5 lg:bg-transparent rounded-xl lg:rounded-none border lg:border-none border-white/10">
+                      <Landmark className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <div className="flex-1 text-left min-w-0">
+                        <label className="block text-[9px] uppercase tracking-wider text-white/50 font-bold">Max Budget</label>
+                        <select 
+                          value={searchBudget} 
+                          onChange={(e) => setSearchBudget(e.target.value)}
+                          className="bg-transparent text-white text-xs outline-none border-none w-full cursor-pointer pr-2 truncate [&>option]:bg-neutral-900"
+                        >
+                          <option value="">Any Price</option>
+                          <option value="1000000">Under 10 Lakh</option>
+                          <option value="2000000">Under 20 Lakh</option>
+                          <option value="3000000">Under 30 Lakh</option>
+                          <option value="5000000">Under 50 Lakh</option>
+                          <option value="8000000">Under 80 Lakh</option>
+                          <option value="15000000">Under 1.5 Crore</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Search Button */}
-                  <button 
-                    type="submit" 
-                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 flex-shrink-0 md:ml-1 mt-1 md:mt-0"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    <span>Search</span>
-                  </button>
+                    {/* Search Button */}
+                    <button 
+                      type="submit" 
+                      className="col-span-1 sm:col-span-2 lg:col-span-1 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm px-6 py-2.5 lg:py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 flex-shrink-0"
+                    >
+                      <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span>Search</span>
+                    </button>
+                  </div>
                 </div>
               </form>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 animate-fade-in-up text-[11px] text-white/70" style={{ animationDelay: "580ms" }}>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 animate-fade-in-up text-[11px] sm:text-xs text-white/75 font-medium" style={{ animationDelay: "580ms" }}>
                 <div className="flex items-center gap-1.5">
                   <Check className="w-3.5 h-3.5 text-blue-400 bg-blue-500/10 p-0.5 rounded-full" />
                   <span>Verified Listings</span>
@@ -276,25 +281,22 @@ const Index = () => {
           </div>
 
           {/* Bottom Statistics Strip */}
-          <div className="relative z-10 w-full max-w-[1440px] mx-auto border-t border-white/10 pt-4 mt-6 sm:mt-8 grid grid-cols-2 md:flex justify-between items-center text-xs md:text-sm text-white/75 gap-3 sm:gap-4 animate-fade-in" style={{ animationDelay: "650ms" }}>
-            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
-              <span className="font-bold text-white text-sm sm:text-base">5,000+</span>
-              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cars Listed</span>
+          <div className="relative z-10 w-full max-w-[1440px] mx-auto border-t border-white/10 pt-3.5 mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-4 justify-between items-center text-xs sm:text-sm text-white/80 gap-2.5 sm:gap-4 animate-fade-in" style={{ animationDelay: "650ms" }}>
+            <div className="flex items-center gap-2 bg-white/5 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-center sm:justify-start">
+              <span className="font-extrabold text-white text-xs sm:text-base lg:text-lg">5,000+</span>
+              <span className="text-white/50 text-[9px] sm:text-[11px] uppercase tracking-wider font-semibold">Cars Listed</span>
             </div>
-            <div className="h-4 w-px bg-white/10 hidden md:block" />
-            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
-              <span className="font-bold text-white text-sm sm:text-base">1,200+</span>
-              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Sellers</span>
+            <div className="flex items-center gap-2 bg-white/5 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-center sm:justify-start sm:border-l sm:border-white/10 sm:pl-4 lg:pl-6">
+              <span className="font-extrabold text-white text-xs sm:text-base lg:text-lg">1,200+</span>
+              <span className="text-white/50 text-[9px] sm:text-[11px] uppercase tracking-wider font-semibold">Sellers</span>
             </div>
-            <div className="h-4 w-px bg-white/10 hidden md:block" />
-            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
-              <span className="font-bold text-white text-sm sm:text-base">95%</span>
-              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Accuracy</span>
+            <div className="flex items-center gap-2 bg-white/5 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-center sm:justify-start sm:border-l sm:border-white/10 sm:pl-4 lg:pl-6">
+              <span className="font-extrabold text-white text-xs sm:text-base lg:text-lg">95%</span>
+              <span className="text-white/50 text-[9px] sm:text-[11px] uppercase tracking-wider font-semibold">Accuracy</span>
             </div>
-            <div className="h-4 w-px bg-white/10 hidden md:block" />
-            <div className="flex items-center gap-2 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-xl">
-              <span className="font-bold text-white text-sm sm:text-base">50+</span>
-              <span className="text-white/50 text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">Cities</span>
+            <div className="flex items-center gap-2 bg-white/5 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-center sm:justify-start sm:border-l sm:border-white/10 sm:pl-4 lg:pl-6">
+              <span className="font-extrabold text-white text-xs sm:text-base lg:text-lg">50+</span>
+              <span className="text-white/50 text-[9px] sm:text-[11px] uppercase tracking-wider font-semibold">Cities</span>
             </div>
           </div>
         </section>
