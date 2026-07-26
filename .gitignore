@@ -35,5 +35,10 @@ __pycache__/
 venv/
 server/venv/
 scratch/
-*.docx
+# Presentation files & assets
+*.pptx
+*.ppt
+presentation_assets/
+scripts/
+
 

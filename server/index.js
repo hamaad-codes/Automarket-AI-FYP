@@ -18,8 +18,17 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static('uploads'));
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config(); // fallback to root .env
+
 // Database Connection
-const mongoUri = process.env.MONGO_URI;
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/automarket';
 mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 })
     .then(() => {
         const dbName = mongoose.connection.name;
@@ -31,7 +40,7 @@ mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 })
     .catch(err => {
         console.error('MongoDB Connection Error (primary):', err.message);
         // If primary URI is not local, try fallback to local MongoDB
-        if (!mongoUri.includes('127.0.0.1')) {
+        if (mongoUri && !mongoUri.includes('127.0.0.1')) {
             console.log('Attempting fallback to local MongoDB (mongodb://127.0.0.1:27017/automarket)...');
             mongoose.connect('mongodb://127.0.0.1:27017/automarket', { serverSelectionTimeoutMS: 5000 })
                 .then(() => {

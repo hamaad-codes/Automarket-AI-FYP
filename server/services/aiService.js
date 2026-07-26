@@ -14,20 +14,62 @@ const withTimeout = (promise, ms) => {
     ]);
 };
 
-// System Prompt Configuration
-const systemPrompt = `You are AutoMarket Advisor, a premium Pakistani car consultant chatbot.
+const getSystemPrompt = (lastUserMessageText) => {
+    let languageInstruction = "Strictly reply in the exact same language and script used by the user.";
+    
+    if (lastUserMessageText) {
+        const text = lastUserMessageText.trim();
+        const lower = text.toLowerCase();
+        
+        // Urdu script check
+        if (/[\u0600-\u06FF]/.test(text)) {
+            if (/\b(مینوں|چاہیدی|تہاڈے|تہانوں|وچ|آے|کوئی)\b/.test(text)) {
+                languageInstruction = "CRITICAL: The user wrote in Shahmukhi Punjabi (اردو رسم الخط). You MUST reply 100% in Shahmukhi Punjabi (Urdu script).";
+            } else {
+                languageInstruction = "CRITICAL: The user wrote in Urdu script (اردو). You MUST reply 100% in Urdu script (اردو).";
+            }
+        } else {
+            // Roman Punjabi check
+            const punjabiKeywords = ['meinu', 'mainu', 'chahidi', 'chaidi', 'tuhanu', 'tuhade', 'vaddi', 'gaddi', 'vich', 'jiven', 'haazir ne', 'sanu', 'sadi'];
+            const isPunjabi = punjabiKeywords.some(kw => lower.includes(kw));
+
+            // Roman Urdu check
+            const urduKeywords = ['chahiye', 'chahye', 'dikhao', 'batao', 'gari', 'gadi', 'gaadi', 'mein', 'me', 'karo', 'hai', 'hain', 'dastiyab', 'sasti', 'bhi', 'kya'];
+            const isUrdu = urduKeywords.some(kw => lower.includes(kw));
+
+            // Pure English check
+            const englishWords = ['i', 'need', 'want', 'show', 'car', 'cars', 'looking', 'find', 'best', 'available', 'under', 'price', 'in', 'for'];
+            const words = lower.split(/\s+/);
+            const isEnglish = words.some(w => englishWords.includes(w)) && !isPunjabi && !isUrdu;
+
+            if (isEnglish) {
+                languageInstruction = "CRITICAL: The user wrote in pure ENGLISH (e.g., 'i need honda civic in Rawalpindi'). You MUST reply 100% IN PURE ENGLISH. Absolutely DO NOT use Roman Urdu or Punjabi words like 'haazir ne', 'vich', 'gadiyan', 'hai', 'mein'.";
+            } else if (isPunjabi) {
+                languageInstruction = "CRITICAL: The user wrote in Roman Pakistani Punjabi (e.g., 'meinu automatic gari chahidi ae'). You MUST reply 100% in Roman Pakistani Punjabi (e.g., 'Rawalpindi vich eh Honda Civic gadiyan haazir ne').";
+            } else if (isUrdu) {
+                languageInstruction = "CRITICAL: The user wrote in Roman Urdu (e.g., 'mujhe gari chahiye'). You MUST reply 100% in Roman Urdu (e.g., 'Rawalpindi mein yeh Honda Civic gadiyan dastiyab hain').";
+            }
+        }
+    }
+
+    return `You are AutoMarket Advisor, a premium Pakistani car consultant chatbot.
 Your goal is to assist users in buying or finding cars on the AutoMarket platform.
-You can understand English, Urdu, and Punjabi (both in native script like Shahmukhi/Urdu script, and Roman/transliterated script).
-Always reply in the user's preferred language or matching their language style:
-- If they speak Punjabi, reply in warm, helpful Punjabi.
-- If they speak Urdu or Roman Urdu, reply in Urdu or Roman Urdu.
-- If they speak English, reply in English.
-IMPORTANT: Never use the Gurmukhi script (Indian Punjabi script, e.g., ਸਤ ਸ੍ਰੀ ਅਕਾਲ) under any circumstances. You must ALWAYS write Punjabi in either **Shahmukhi (Urdu script, e.g., کی حال اے / تہاڈے لئی گڈی)** or in **Roman script (using English alphabets, e.g., 'ki hal ae', 'meinu automatic gari chahidi ae')** depending on the style the user used.
+
+${languageInstruction}
+
+STRICT LANGUAGE RULES:
+1. If the user speaks/types in ENGLISH: Reply 100% in English only.
+2. If the user speaks/types in ROMAN URDU: Reply 100% in Roman Urdu.
+3. If the user speaks/types in ROMAN PUNJABI: Reply 100% in Roman Pakistani Punjabi.
+4. If the user speaks/types in URDU SCRIPT: Reply 100% in Urdu script.
+5. NEVER use Gurmukhi script (Indian Punjabi, e.g., ਸਤ ਸ੍ਰੀ ਅਕਾਲ). Use ONLY Roman script or Urdu/Shahmukhi script.
+
 Be conversational, helpful, and polite.
-If the user greets you (e.g. 'hello', 'hi', 'salam', 'ki hal ae', 'ki hal chal ae', 'kese ho'), greet them back warmly and ask how you can help them find a car. Do not suggest cars on a simple greeting.
-You have access to the 'search_cars' tool. Always call this tool when the user specifies criteria to search for cars (e.g., "show me Toyotas", "civic under 30 lakhs", "sasti gaadiyan", "meinu automatic gari chaidi ae").
+If the user greets you (e.g. 'hello', 'hi', 'salam', 'ki hal ae', 'kese ho'), greet them back warmly in their language and ask how you can help them find a car. Do not suggest cars on a simple greeting.
+You have access to the 'search_cars' tool. Always call this tool when the user specifies criteria to search for cars (e.g., "show me Toyotas", "civic under 30 lakhs", "meinu automatic gari chaidi ae").
 When calling search_cars, you MUST strictly pass all numeric arguments (like minPrice, maxPrice, minYear, maxYear) as numbers, not strings (e.g., 4000000 instead of "4000000").
-When formatting search response, summarize the cars found briefly in the same language.`;
+When formatting search response, summarize the cars found briefly in the SAME language used by the user.`;
+};
 
 // Gemini Search Cars Tool Declaration
 const geminiSearchCarsTool = {
@@ -173,13 +215,14 @@ const callGeminiChat = async (messages, preferredLanguage, userPreferences) => {
 
     const chatHistory = formatHistoryForGemini(messages.slice(0, -1));
     const lastMsg = messages[messages.length - 1];
+    const dynamicSystemPrompt = getSystemPrompt(lastMsg ? lastMsg.content : '');
 
     const contents = [
         ...chatHistory,
         { role: 'user', parts: [{ text: lastMsg.content }] }
     ];
 
-    const result = await generateGeminiContent(genAI, contents, systemPrompt, [geminiSearchCarsTool]);
+    const result = await generateGeminiContent(genAI, contents, dynamicSystemPrompt, [geminiSearchCarsTool]);
     const response = result.response;
     const functionCalls = response.functionCalls();
     
@@ -218,7 +261,7 @@ const callGeminiChat = async (messages, preferredLanguage, userPreferences) => {
                 modelContent,
                 toolResponsePart
             ];
-            const followUpResult = await generateGeminiContent(genAI, followUpContents, systemPrompt, [geminiSearchCarsTool]);
+            const followUpResult = await generateGeminiContent(genAI, followUpContents, dynamicSystemPrompt, [geminiSearchCarsTool]);
             finalResponseText = followUpResult.response.text();
         }
     } else {
@@ -262,8 +305,11 @@ const callGroqChat = async (modelName, messages, preferredLanguage, userPreferen
 
     console.log(`🤖 Attempting generation with Groq model: ${modelName}...`);
 
+    const lastMsg = messages[messages.length - 1];
+    const dynamicSystemPrompt = getSystemPrompt(lastMsg ? lastMsg.content : '');
+
     const formattedMessages = [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: dynamicSystemPrompt },
         ...messages.map(msg => ({
             role: msg.role === 'assistant' ? 'assistant' : 'user',
             content: msg.content
