@@ -99,6 +99,25 @@ export default function DealerPricing() {
       <Header />
 
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 animate-fade-in">
+        {/* Admin Overview Banner */}
+        {(() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role === 'admin') {
+            return (
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-3 px-4 flex items-center justify-between text-xs font-semibold text-purple-600">
+                <span className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-purple-600" />
+                  <span>👑 <strong>Platform Admin View:</strong> These are the B2B SaaS Subscriptions offered to car showrooms & dealers.</span>
+                </span>
+                <Button size="sm" variant="outline" onClick={() => navigate('/admin')} className="h-7 text-[11px] font-bold border-purple-500/30 text-purple-600 hover:bg-purple-500/10">
+                  Manage Subscribed Showrooms in Admin Panel
+                </Button>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         {/* Page Hero Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <Badge className="bg-primary/10 text-primary border-primary/20 font-bold px-3 py-1 text-xs uppercase tracking-widest">
@@ -179,16 +198,35 @@ export default function DealerPricing() {
                 </div>
 
                 <div className="pt-8">
-                  <Button
-                    onClick={() => handleStartSubscription(key)}
-                    className={`w-full h-12 rounded-xl text-xs font-bold shadow-premium gap-2 ${
-                      isPro ? "bg-primary hover:bg-primary/90 text-white" : ""
-                    }`}
-                    variant={isPro ? "default" : "outline"}
-                  >
-                    {plan.cta}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  {(() => {
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    const isAdmin = user.role === 'admin';
+
+                    if (isAdmin) {
+                      return (
+                        <Button
+                          onClick={() => navigate("/admin")}
+                          className="w-full h-12 rounded-xl text-xs font-bold gap-2 bg-purple-600 hover:bg-purple-700 text-white shadow-premium"
+                        >
+                          <Crown className="w-4 h-4" />
+                          👑 Admin: Manage Showrooms
+                        </Button>
+                      );
+                    }
+
+                    return (
+                      <Button
+                        onClick={() => handleStartSubscription(key)}
+                        className={`w-full h-12 rounded-xl text-xs font-bold shadow-premium gap-2 ${
+                          isPro ? "bg-primary hover:bg-primary/90 text-white" : ""
+                        }`}
+                        variant={isPro ? "default" : "outline"}
+                      >
+                        {plan.cta}
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    );
+                  })()}
                 </div>
               </div>
             );

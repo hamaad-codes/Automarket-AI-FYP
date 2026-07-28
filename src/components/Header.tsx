@@ -99,7 +99,7 @@ const Header = () => {
     { path: "/", label: "Home" },
     { path: "/buy-now", label: "Buy Now" },
     { path: "/auctions", label: "Auctions" },
-    { path: "/dealer-pricing", label: "Dealer Plans", icon: Building2 },
+    ...(user?.role !== 'admin' ? [{ path: "/dealer-pricing", label: "Dealer Plans", icon: Building2 }] : []),
     ...(user ? [
       { path: "/inventory", label: "Inventory", icon: Package },
       { path: "/analytics", label: "Analytics", icon: BarChart3 }

@@ -65,12 +65,16 @@ router.get('/', async (req, res) => {
 
         const query = {};
 
-        // Status filter (Default to active for public, unless specifically overridden or fetching for a specific user)
+        // Status filter (Show active, approved, or unassigned status cars in public listings)
         if (req.query.status) {
             query.status = req.query.status;
         } else if (!req.query.user) {
-            // Only show active cars in public listings
-            query.status = 'active';
+            query.$or = [
+                { status: 'active' },
+                { status: 'approved' },
+                { status: { $exists: false } },
+                { status: null }
+            ];
         }
 
         const filters = [];
@@ -281,10 +285,13 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Create new car
+// Create new car (Auto-approved if posted by Admin)
 router.post('/', auth, async (req, res) => {
     try {
         const carData = { ...req.body, user: req.user.id };
+        if (req.user.role === 'admin') {
+            carData.status = 'active';
+        }
         const car = new Car(carData);
         const newCar = await car.save();
         res.status(201).json(newCar);

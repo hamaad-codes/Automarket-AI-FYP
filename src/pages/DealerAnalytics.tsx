@@ -33,7 +33,10 @@ import {
   MessageSquare,
   ShieldAlert,
   Loader2,
-  Zap
+  Zap,
+  ChevronDown,
+  Building2,
+  Crown
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -95,6 +98,9 @@ export default function DealerAnalytics() {
   };
 
   // Real Aggregated KPI Metrics from Database
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdmin = currentUser.role === 'admin';
+
   const totalViews = myCars.reduce((acc, c) => acc + (c.views || 0), 0);
   const totalPhoneClicks = myCars.reduce((acc, c) => acc + (c.phoneClicks || c.inquiries || 0), 0);
   const totalListingsCount = myCars.length;
@@ -150,22 +156,47 @@ export default function DealerAnalytics() {
       <Header />
 
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+        {/* Admin System Analytics Banner */}
+        {(() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role === 'admin') {
+            return (
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-3 px-4 flex items-center justify-between text-xs font-semibold text-purple-600">
+                <span className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-purple-600" />
+                  <span>👑 <strong>Platform Admin Overview:</strong> You are viewing total marketplace analytics across all registered dealers.</span>
+                </span>
+                <Button size="sm" variant="outline" onClick={() => navigate('/admin')} className="h-7 text-[11px] font-bold border-purple-500/30 text-purple-600 hover:bg-purple-500/10">
+                  Return to Admin Panel
+                </Button>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         {/* Header Title Section */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border/50 pb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold px-2.5 py-0.5">
-                📈 Dealer Analytics Panel
+              <Badge variant="outline" className={`text-xs font-semibold px-2.5 py-0.5 ${
+                isAdmin 
+                  ? "bg-purple-500/10 text-purple-600 border-purple-500/20" 
+                  : "bg-primary/10 text-primary border-primary/20"
+              }`}>
+                {isAdmin ? "👑 Platform System Analytics" : "📈 Dealer Analytics Panel"}
               </Badge>
               <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
                 Real-Time Tracking
               </Badge>
             </div>
             <h1 className="text-3xl font-bold font-heading text-foreground tracking-tight">
-              Dealer Performance & Market Analytics
+              {isAdmin ? "Platform System Analytics & Market Overview" : "Dealer Performance & Market Analytics"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Track vehicle page views, phone number clicks (leads), and AI Price vs Market Trend insights.
+              {isAdmin 
+                ? `System-wide buyer impressions across all ${totalListingsCount} listings, direct contact leads, and AI market alignment.` 
+                : "Track vehicle page views, phone number clicks (leads), and AI Price vs Market Trend insights."}
             </p>
           </div>
 
@@ -187,11 +218,11 @@ export default function DealerAnalytics() {
             </div>
 
             <Button
-              onClick={() => navigate("/create-listing")}
+              onClick={() => navigate(isAdmin ? "/admin" : "/create-listing")}
               className="rounded-xl bg-primary shadow-premium text-xs font-bold gap-1.5 h-10"
             >
-              <Car className="w-4 h-4" />
-              Post New Vehicle
+              {isAdmin ? <Crown className="w-4 h-4" /> : <Car className="w-4 h-4" />}
+              {isAdmin ? "Admin Control Panel" : "Post New Vehicle"}
             </Button>
           </div>
         </div>
@@ -449,21 +480,40 @@ export default function DealerAnalytics() {
                         </td>
 
                         <td className="py-3 px-4 text-right">
-                          {car.isFeatured ? (
-                            <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-[10px] px-2.5 py-1">
-                              ★ FEATURED
-                            </Badge>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setBoostModalCar(car)}
-                              className="h-8 text-xs font-bold gap-1 text-primary border-primary/30 hover:bg-primary/10 rounded-xl"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                              Boost Ad
-                            </Button>
-                          )}
+                          {(() => {
+                            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                            const currentUserId = currentUser.id || currentUser._id;
+                            const carUserId = car.user?._id || car.user;
+                            const isOwner = currentUserId && (currentUserId === carUserId);
+
+                            if (car.isFeatured) {
+                              return (
+                                <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-[10px] px-2.5 py-1 shadow-sm">
+                                  ★ FEATURED
+                                </Badge>
+                              );
+                            }
+
+                            if (isOwner) {
+                              return (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setBoostModalCar(car)}
+                                  className="h-8 text-xs font-bold gap-1 text-primary border-primary/30 hover:bg-primary/10 rounded-xl"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  Boost Ad
+                                </Button>
+                              );
+                            }
+
+                            return (
+                              <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground border-border/60">
+                                Standard Ad
+                              </Badge>
+                            );
+                          })()}
                         </td>
                       </tr>
                     );

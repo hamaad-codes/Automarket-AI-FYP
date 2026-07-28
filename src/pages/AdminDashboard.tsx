@@ -36,7 +36,11 @@ import {
   ShieldCheck,
   RefreshCw,
   Loader2,
-  DollarSign
+  DollarSign,
+  Building2,
+  BarChart3,
+  ExternalLink,
+  Crown
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +48,7 @@ import { useToast } from "@/hooks/use-toast";
 const AdminDashboard = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"pending" | "revision_requested" | "approved" | "rejected" | "users">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "revision_requested" | "approved" | "rejected" | "users" | "dealers" | "platform_analytics">("pending");
   
   // Inspection Modal States
   const [selectedCar, setSelectedCar] = useState<any | null>(null);
@@ -76,6 +80,10 @@ const AdminDashboard = () => {
       let url = '';
       if (activeTab === 'users') {
         url = `${API_BASE_URL}/api/auth/users`;
+      } else if (activeTab === 'dealers') {
+        url = `${API_BASE_URL}/api/dealers`;
+      } else if (activeTab === 'platform_analytics') {
+        url = `${API_BASE_URL}/api/cars/admin/list?status=active`;
       } else {
         const status = activeTab === 'approved' ? 'active' : activeTab;
         url = `${API_BASE_URL}/api/cars/admin/list?status=${status}`;
@@ -86,7 +94,7 @@ const AdminDashboard = () => {
         headers: { 'x-auth-token': token || '' }
       });
       const resData = await response.json();
-      setData(resData);
+      setData(Array.isArray(resData) ? resData : (resData.cars || []));
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({ title: "Error", description: `Failed to fetch ${activeTab}`, variant: "destructive" });
@@ -231,6 +239,8 @@ const AdminDashboard = () => {
     { id: "approved", label: "Approved", icon: CheckCircle },
     { id: "rejected", label: "Rejected", icon: XCircle },
     { id: "users", label: "Users", icon: Users },
+    { id: "dealers", label: "Showrooms & SaaS Tiers", icon: Building2 },
+    { id: "platform_analytics", label: "Platform Revenue & Analytics", icon: BarChart3 },
   ];
 
   return (
@@ -280,6 +290,21 @@ const AdminDashboard = () => {
                     <TableHead className="font-heading font-semibold">Role</TableHead>
                     <TableHead className="font-heading font-semibold">Joined</TableHead>
                   </>
+                ) : activeTab === 'dealers' ? (
+                  <>
+                    <TableHead className="font-heading font-semibold">Showroom / Dealer</TableHead>
+                    <TableHead className="font-heading font-semibold">SaaS Tier</TableHead>
+                    <TableHead className="font-heading font-semibold">Badge Status</TableHead>
+                    <TableHead className="font-heading font-semibold">Showroom Link</TableHead>
+                    <TableHead className="font-heading font-semibold text-right">Actions</TableHead>
+                  </>
+                ) : activeTab === 'platform_analytics' ? (
+                  <>
+                    <TableHead className="font-heading font-semibold">Metric</TableHead>
+                    <TableHead className="font-heading font-semibold">Platform Value</TableHead>
+                    <TableHead className="font-heading font-semibold">Status</TableHead>
+                    <TableHead className="font-heading font-semibold text-right">Action</TableHead>
+                  </>
                 ) : (
                   <>
                     <TableHead className="font-heading font-semibold">Vehicle</TableHead>
@@ -322,6 +347,74 @@ const AdminDashboard = () => {
                     </TableCell>
                   </TableRow>
                 ))
+              ) : activeTab === 'dealers' ? (
+                data.map((dealer) => (
+                  <TableRow key={dealer._id} className="hover:bg-muted/50 border-border/50 transition-colors">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary">
+                          <Building2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-foreground">{dealer.dealerShowroomName || `${dealer.name} Motors`}</p>
+                          <p className="text-xs text-muted-foreground">{dealer.email}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="capitalize font-bold text-xs bg-primary/10 text-primary border-primary/20">
+                        {dealer.dealerTier || 'starter'} Plan
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {dealer.isVerifiedDealer ? (
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 font-bold text-xs gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5" /> Verified ⭐
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-muted-foreground">Standard Dealer</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-xs text-primary font-semibold">
+                        /dealer/{dealer.dealerShowroomSlug || 'showroom'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/dealer/${dealer.dealerShowroomSlug || dealer._id}`)}
+                        className="h-8 text-xs font-bold gap-1 text-primary border-primary/30 hover:bg-primary/10 rounded-lg"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> View Showroom Page
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : activeTab === 'platform_analytics' ? (
+                <>
+                  <TableRow className="hover:bg-muted/50 border-border/50">
+                    <TableCell className="font-bold">Total Platform SaaS Subscriptions</TableCell>
+                    <TableCell className="font-extrabold text-primary">PKR 185,000 / month</TableCell>
+                    <TableCell><Badge className="bg-green-500/10 text-green-600 border-green-500/20 font-bold">Active MRR</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => navigate('/dealer-pricing')} className="h-8 text-xs font-bold bg-primary rounded-lg">
+                        Manage SaaS Plans
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow className="hover:bg-muted/50 border-border/50">
+                    <TableCell className="font-bold">Total Active Marketplace Inventory</TableCell>
+                    <TableCell className="font-extrabold text-foreground">{data.length} Vehicles Listed</TableCell>
+                    <TableCell><Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-bold">Live Listings</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="outline" onClick={() => navigate('/analytics')} className="h-8 text-xs font-bold text-primary border-primary/30 rounded-lg">
+                        Open System Analytics
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </>
               ) : (
                 data.map((car) => (
                   <TableRow key={car._id} className="hover:bg-muted/50 border-border/50 transition-colors">
