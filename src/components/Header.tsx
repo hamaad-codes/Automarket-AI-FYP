@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, Plus, Package, User, LogOut, X, MessageSquare } from "lucide-react";
+import { Search, Menu, Plus, Package, User, LogOut, X, MessageSquare, BarChart3, Building2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import logo from "@/assets/logo.png";
 import SearchBar from "./SearchBar";
@@ -99,7 +99,11 @@ const Header = () => {
     { path: "/", label: "Home" },
     { path: "/buy-now", label: "Buy Now" },
     { path: "/auctions", label: "Auctions" },
-    ...(user ? [{ path: "/inventory", label: "Inventory", icon: Package }] : []),
+    { path: "/dealer-pricing", label: "Dealer Plans", icon: Building2 },
+    ...(user ? [
+      { path: "/inventory", label: "Inventory", icon: Package },
+      { path: "/analytics", label: "Analytics", icon: BarChart3 }
+    ] : []),
     ...(user?.role === 'admin' ? [{ path: "/admin", label: "Admin Panel" }] : []),
   ];
 

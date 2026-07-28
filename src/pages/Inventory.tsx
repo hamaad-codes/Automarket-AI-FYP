@@ -37,6 +37,8 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { PaymentGatewayModal } from "@/components/PaymentGatewayModal";
+import { Sparkles, AlertTriangle } from "lucide-react";
 
 const Inventory = () => {
   const [listings, setListings] = useState<any[]>([]);
@@ -145,18 +147,21 @@ const Inventory = () => {
     }
   };
 
+  const [boostCarModal, setBoostCarModal] = useState<any | null>(null);
+
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       active: "bg-green-500/10 text-green-600 border-green-500/20",
       auction: "bg-accent-gold/10 text-accent-gold border-accent-gold/20",
       pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+      revision_requested: "bg-amber-500/10 text-amber-600 border-amber-500/30",
       sold: "bg-muted text-muted-foreground border-border",
       draft: "bg-muted text-muted-foreground border-border",
     };
 
     return (
-      <Badge variant="outline" className={`${styles[status]} capitalize font-medium`}>
-        {status}
+      <Badge variant="outline" className={`${styles[status] || styles.pending} capitalize font-medium`}>
+        {status === 'revision_requested' ? 'Action Required' : status}
       </Badge>
     );
   };
@@ -315,6 +320,10 @@ const Inventory = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           View Listing
                         </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer font-bold text-primary" onClick={() => setBoostCarModal(listing)}>
+                          <Sparkles className="w-4 h-4 mr-2 text-primary" />
+                          Boost Ad (Featured)
+                        </DropdownMenuItem>
                         {activeTab === 'listings' && (
                           <>
                             <DropdownMenuItem className="cursor-pointer" onClick={() => navigate(`/edit-listing/${listing._id}`)}>
@@ -423,6 +432,19 @@ const Inventory = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Payment Gateway Boosting Modal */}
+      {boostCarModal && (
+        <PaymentGatewayModal
+          isOpen={!!boostCarModal}
+          onClose={() => setBoostCarModal(null)}
+          car={boostCarModal}
+          onSuccess={() => {
+            fetchListings();
+            setBoostCarModal(null);
+          }}
+        />
       )}
     </div>
   );

@@ -36,6 +36,10 @@ const carSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    phoneClicks: {
+        type: Number,
+        default: 0
+    },
     type: {
         type: String,
         default: 'buy-now'
@@ -54,6 +58,34 @@ const carSchema = new mongoose.Schema({
     sellerName: String,
     sellerEmail: String,
     features: [String],
+    adminNotes: {
+        type: String,
+        default: ''
+    },
+    revisionReason: {
+        type: String,
+        default: ''
+    },
+    aiEstimatedPrice: {
+        type: Number,
+        default: null
+    },
+    isFeatured: {
+        type: Boolean,
+        default: false
+    },
+    featuredTier: {
+        type: String,
+        default: ''
+    },
+    featuredUntil: {
+        type: Date,
+        default: null
+    },
+    inspectionScore: {
+        type: Number,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

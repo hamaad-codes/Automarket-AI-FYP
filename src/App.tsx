@@ -16,6 +16,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import Inbox from "./pages/Inbox";
+import DealerAnalytics from "./pages/DealerAnalytics";
+import DealerPricing from "./pages/DealerPricing";
+import DedicatedShowroom from "./pages/DedicatedShowroom";
 import { ChatBot } from "@/components/ChatBot";
 
 const App = () => (
@@ -37,6 +40,9 @@ const App = () => (
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/edit-listing/:id" element={<CreateListing />} />
         <Route path="/inventory" element={<Inventory />} />
+        <Route path="/analytics" element={<DealerAnalytics />} />
+        <Route path="/dealer-pricing" element={<DealerPricing />} />
+        <Route path="/dealer/:slug" element={<DedicatedShowroom />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

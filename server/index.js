@@ -69,11 +69,13 @@ import chatRoutes from './routes/chat.js';
 import auctionRoutes from './routes/auctions.js';
 import notificationRoutes from './routes/notifications.js';
 import messagesRoutes from './routes/messages.js';
+import dealerRoutes from './routes/dealer.js';
 app.use('/api/cars', carRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messagesRoutes);
+app.use('/api/dealers', dealerRoutes);
 
 // Socket.io & HTTP Server Wrap
 import { createServer } from 'http';

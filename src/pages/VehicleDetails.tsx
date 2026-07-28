@@ -25,6 +25,26 @@ import {
     Wind
 } from "lucide-react";
 
+import { PaymentGatewayModal } from "@/components/PaymentGatewayModal";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { 
+    Calculator, 
+    Landmark, 
+    Sparkles, 
+    Zap, 
+    Check, 
+    Send, 
+    Loader2 
+} from "lucide-react";
+
 const VehicleDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -33,6 +53,18 @@ const VehicleDetails = () => {
     const [activeImage, setActiveImage] = useState(0);
     const [bidAmount, setBidAmount] = useState("");
     const [auctionData, setAuctionData] = useState<any>(null);
+
+    // Monetization & Boost State
+    const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
+
+    // Bank Financing Calculator State
+    const [downPaymentPercent, setDownPaymentPercent] = useState(20);
+    const [loanTenureYears, setLoanTenureYears] = useState(3);
+    const [selectedBank, setSelectedBank] = useState("Meezan Bank Islamic Auto Finance");
+    const [isFinancingModalOpen, setIsFinancingModalOpen] = useState(false);
+    const [applicantName, setApplicantName] = useState("");
+    const [applicantPhone, setApplicantPhone] = useState("");
+    const [isSubmittingFinancing, setIsSubmittingFinancing] = useState(false);
 
     useEffect(() => {
         const fetchVehicle = async () => {
@@ -371,6 +403,91 @@ const VehicleDetails = () => {
                                     ))}
                                 </div>
                             </div>
+
+                            <Separator />
+
+                            {/* Commercial Feature: Interactive Bank Financing Calculator */}
+                            <div className="bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                            <Landmark className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-heading font-bold text-base text-foreground">Bank Financing & Installment Estimator</h3>
+                                            <p className="text-xs text-muted-foreground">Calculate monthly installments & apply for Islamic Auto Finance</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
+                                        Partner Banks
+                                    </Badge>
+                                </div>
+
+                                <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-muted-foreground flex justify-between">
+                                            <span>Down Payment ({downPaymentPercent}%)</span>
+                                            <span className="font-bold text-foreground">PKR {Math.round((vehicle.price * downPaymentPercent) / 100).toLocaleString()}</span>
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="20"
+                                            max="50"
+                                            step="5"
+                                            value={downPaymentPercent}
+                                            onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
+                                            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-muted-foreground flex justify-between">
+                                            <span>Loan Tenure</span>
+                                            <span className="font-bold text-foreground">{loanTenureYears} Years</span>
+                                        </label>
+                                        <div className="flex gap-2">
+                                            {[1, 2, 3, 5].map((y) => (
+                                                <button
+                                                    key={y}
+                                                    type="button"
+                                                    onClick={() => setLoanTenureYears(y)}
+                                                    className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all border ${
+                                                        loanTenureYears === y
+                                                            ? "bg-primary text-primary-foreground border-primary"
+                                                            : "bg-muted text-muted-foreground border-border/50 hover:text-foreground"
+                                                    }`}
+                                                >
+                                                    {y} Yrs
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Calculation Result Display */}
+                                <div className="bg-card p-4 rounded-xl border border-border/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground font-medium">Estimated Monthly Installment</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-xs font-semibold text-primary">PKR</span>
+                                            <span className="font-heading text-2xl font-bold text-primary">
+                                                {Math.round(
+                                                    ((vehicle.price * (1 - downPaymentPercent / 100)) * (1 + 0.15 * loanTenureYears)) / (loanTenureYears * 12)
+                                                ).toLocaleString()}
+                                                <span className="text-xs text-muted-foreground font-normal"> / month</span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        onClick={() => setIsFinancingModalOpen(true)}
+                                        className="rounded-xl bg-primary shadow-premium text-xs font-semibold px-4 h-10 gap-1.5 w-full sm:w-auto"
+                                    >
+                                        <Landmark className="w-4 h-4" />
+                                        Apply For Auto Finance
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -380,14 +497,23 @@ const VehicleDetails = () => {
                             {/* Price Card */}
                             <div className="bg-card rounded-3xl border border-border/50 p-6 shadow-premium">
                                 <div className="mb-6 space-y-4">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground font-medium uppercase tracking-wide mb-1">Base Price</p>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-md font-semibold text-muted-foreground">PKR</span>
-                                            <span className="font-heading text-2xl font-bold text-muted-foreground">
-                                                {vehicle.price?.toLocaleString()}
-                                            </span>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground font-medium uppercase tracking-wide mb-1">Asking Price</p>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-md font-semibold text-primary">PKR</span>
+                                                <span className="font-heading text-3xl font-bold text-foreground">
+                                                    {vehicle.price?.toLocaleString()}
+                                                </span>
+                                            </div>
                                         </div>
+
+                                        {/* Featured Tag Badge if boosted */}
+                                        {vehicle.isFeatured && (
+                                            <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground border-none font-bold uppercase tracking-wider text-[10px] px-2.5 py-1 shadow-md animate-pulse">
+                                                ★ FEATURED
+                                            </Badge>
+                                        )}
                                     </div>
                                     
                                     <div>
@@ -399,6 +525,28 @@ const VehicleDetails = () => {
                                             </span>
                                         </div>
                                     </div>
+
+                                    {/* Monetization Action: Boost Listing Button ONLY for Owner */}
+                                    {(() => {
+                                        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                                        const currentUserId = currentUser.id || currentUser._id;
+                                        const carUserId = vehicle.user?._id || vehicle.user;
+                                        const isOwner = currentUserId && (currentUserId === carUserId || currentUser.role === 'admin');
+
+                                        if (isOwner && !vehicle.isFeatured) {
+                                            return (
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => setIsBoostModalOpen(true)}
+                                                    className="w-full h-10 rounded-xl border-primary/40 text-primary hover:bg-primary/10 text-xs font-bold gap-2"
+                                                >
+                                                    <Sparkles className="w-4 h-4 text-primary" />
+                                                    🚀 Owner Action: Boost This Ad (10x Views)
+                                                </Button>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
 
                                     {vehicle.type === 'auction' && (
                                         <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground bg-accent-racing/10 p-2 rounded-lg border border-accent-racing/20">
@@ -444,10 +592,22 @@ const VehicleDetails = () => {
                                             Send Inquiry
                                         </Button>
                                     )}
-                                    <Button variant="outline" className="w-full h-12 text-lg font-semibold rounded-xl">
-                                        <Phone className="w-5 h-5 mr-2" />
-                                        Call Seller
-                                    </Button>
+                                    <Button 
+                                         variant="outline" 
+                                         onClick={async () => {
+                                             try {
+                                                 await fetch(`${API_BASE_URL}/api/cars/${vehicle._id}/phone-click`, { method: "POST" });
+                                             } catch (e) { /* ignore */ }
+                                             toast({
+                                                 title: "Seller Contact Info 📞",
+                                                 description: `Phone: ${vehicle.user?.phone || vehicle.sellerEmail || "0300 1234567"}`
+                                             });
+                                         }}
+                                         className="w-full h-12 text-lg font-semibold rounded-xl"
+                                     >
+                                         <Phone className="w-5 h-5 mr-2 text-green-600" />
+                                         Call Seller ({vehicle.phoneClicks || 0} Leads)
+                                     </Button>
                                 </div>
 
                                 <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground bg-secondary/30 py-3 rounded-lg">
@@ -483,6 +643,123 @@ const VehicleDetails = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Payment Gateway Boosting Modal */}
+            <PaymentGatewayModal
+                isOpen={isBoostModalOpen}
+                onClose={() => setIsBoostModalOpen(false)}
+                car={vehicle}
+                onSuccess={() => setVehicle((prev: any) => ({ ...prev, isFeatured: true }))}
+            />
+
+            {/* Bank Financing Lead Dialog */}
+            <Dialog open={isFinancingModalOpen} onOpenChange={setIsFinancingModalOpen}>
+                <DialogContent className="max-w-md rounded-2xl p-6">
+                    <DialogHeader>
+                        <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                <Landmark className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-lg font-bold font-heading">Apply For Bank Auto Financing</DialogTitle>
+                                <DialogDescription className="text-xs text-muted-foreground">
+                                    Submit your financing application for "{vehicle?.title}".
+                                </DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+
+                    <div className="space-y-3 my-2">
+                        <div className="bg-secondary/30 p-3 rounded-xl border border-border/40 text-xs space-y-1">
+                            <div className="flex justify-between"><span className="text-muted-foreground">Vehicle Price:</span> <span className="font-semibold text-foreground">PKR {vehicle?.price?.toLocaleString()}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Down Payment ({downPaymentPercent}%):</span> <span className="font-semibold text-foreground">PKR {Math.round((vehicle?.price * downPaymentPercent) / 100).toLocaleString()}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Tenure:</span> <span className="font-semibold text-foreground">{loanTenureYears} Years</span></div>
+                            <div className="flex justify-between pt-1 border-t border-border/30"><span className="font-bold text-foreground">Est. Monthly Payment:</span> <span className="font-bold text-primary">PKR {Math.round(((vehicle?.price * (1 - downPaymentPercent / 100)) * (1 + 0.15 * loanTenureYears)) / (loanTenureYears * 12)).toLocaleString()} / mo</span></div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Select Partner Bank</label>
+                            <select
+                                value={selectedBank}
+                                onChange={(e) => setSelectedBank(e.target.value)}
+                                className="w-full h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                            >
+                                <option value="Meezan Bank Islamic Auto Finance">Meezan Bank (Car Ijarah - Islamic)</option>
+                                <option value="Bank Alfalah Drive">Bank Alfalah (Auto Loan)</option>
+                                <option value="HBL Car Loan">HBL (Car Finance)</option>
+                                <option value="Faysal Bank Islamic Auto Finance">Faysal Bank (Islamic Finance)</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Your Full Name *</label>
+                            <Input
+                                placeholder="Enter your full name"
+                                value={applicantName}
+                                onChange={(e) => setApplicantName(e.target.value)}
+                                className="h-10 text-xs rounded-xl"
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Contact Phone Number *</label>
+                            <Input
+                                placeholder="e.g. 0300 1234567"
+                                value={applicantPhone}
+                                onChange={(e) => setApplicantPhone(e.target.value)}
+                                className="h-10 text-xs rounded-xl"
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsFinancingModalOpen(false)} className="rounded-xl">
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                if (!applicantName || !applicantPhone) {
+                                    toast({ title: "Validation Error", description: "Please enter your name and phone number.", variant: "destructive" });
+                                    return;
+                                }
+                                try {
+                                    setIsSubmittingFinancing(true);
+                                    const res = await fetch(`${API_BASE_URL}/api/cars/${vehicle._id}/apply-financing`, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            bankName: selectedBank,
+                                            downPayment: Math.round((vehicle.price * downPaymentPercent) / 100),
+                                            tenure: loanTenureYears,
+                                            monthlyInstallment: Math.round(((vehicle.price * (1 - downPaymentPercent / 100)) * (1 + 0.15 * loanTenureYears)) / (loanTenureYears * 12)),
+                                            userName: applicantName,
+                                            userPhone: applicantPhone
+                                        })
+                                    });
+                                    const data = await res.json();
+                                    if (res.ok) {
+                                        toast({
+                                            title: "Application Submitted! 🏦",
+                                            description: `Your application to ${selectedBank} was submitted. Reference ID: ${data.referenceId}`
+                                        });
+                                        setIsFinancingModalOpen(false);
+                                    }
+                                } catch (err) {
+                                    console.error(err);
+                                    toast({ title: "Error", description: "Failed to submit financing lead", variant: "destructive" });
+                                } finally {
+                                    setIsSubmittingFinancing(false);
+                                }
+                            }}
+                            disabled={isSubmittingFinancing}
+                            className="rounded-xl bg-primary font-semibold gap-1.5 shadow-premium"
+                        >
+                            {isSubmittingFinancing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                            Submit Financing Application
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -46,7 +46,32 @@ const UserSchema = new mongoose.Schema({
     savedCars: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Car'
-    }]
+    }],
+    dealerTier: {
+        type: String,
+        enum: ['none', 'starter', 'pro', 'enterprise'],
+        default: 'none'
+    },
+    dealerShowroomName: {
+        type: String,
+        default: ''
+    },
+    dealerShowroomSlug: {
+        type: String,
+        default: ''
+    },
+    isVerifiedDealer: {
+        type: Boolean,
+        default: false
+    },
+    maxListingsLimit: {
+        type: Number,
+        default: 5
+    },
+    dealerSubscriptionExpires: {
+        type: Date,
+        default: null
+    }
 });
 
 export default mongoose.model('User', UserSchema);
